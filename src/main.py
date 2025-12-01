@@ -22,9 +22,9 @@ def get_excel_files(input_folder):
     input_path = Path(input_folder)
     excel_files = list(input_path.glob("*.xlsx"))
     filelist = [f.name for f in excel_files]
-    print(f"Trovati {len(filelist)} file Excel:")
-    for file in filelist:
-        print(f"- {file}")
+    # print(f"Trovati {len(filelist)} file Excel:")
+    # for file in filelist:
+    #     print(f"- {file}")
     return excel_files
 
 
@@ -71,12 +71,14 @@ def write_combined_csv(combined_rows, output_path):
 
 
 if __name__ == "__main__":
-    pathlist = get_excel_files(input_folder)
+    excel_file_list = get_excel_files(input_folder)
+    print(f"📁 Cartella input: {input_folder}")
+    print(f"📊 File trovati: {len(excel_file_list)}")
     rows_per_file = {}
-    for file_path in pathlist:
+    for file_path in excel_file_list:
         workbook = load_workbook_safe(file_path)
         if workbook is not None:
-            print(f"Carico {file_path.name} ... OK, ", end="")
+            print(f"   - carico {file_path.name} ... OK, ", end="")
             rows, num_columns, num_rows = read_sheet_as_rows(workbook)
             print(f"lette {num_rows} righe e {num_columns} colonne.")
             if "header" not in rows_per_file:
@@ -88,17 +90,14 @@ if __name__ == "__main__":
             rows_with_filename = [row + [file_path.name] for row in rows[1:]]
             rows_per_file[file_path.name] = rows_with_filename
     header = rows_per_file.get("header", [])
-    print(f"Header utilizzato: {header}")
+    # print(f"Header utilizzato: {header}")
     combined_rows = combine_rows(header, rows_per_file)
-    print("File processati :", len(rows_per_file) - 1)
-    print("Righe combinate (header escluso):", len(combined_rows) - 1)
-    print("Righe combinate (header incluso):", len(combined_rows))
+    print("📊 File letti :", len(rows_per_file) - 1)
+    print("➕ Aggiunto colonna 'source_file'")
+    # print("Righe combinate (header escluso):", len(combined_rows) - 1)
+    print("📈 Righe combinate (header incluso):", len(combined_rows))
     write_combined_excel(combined_rows, output_folder + "combined.xlsx")
-
-    print("Combinazione completata.")
-    print(f"File generato: {output_folder}combined.xlsx")
-    print(f"Totale righe: {len(combined_rows)} (header incluso)")
-
     write_combined_csv(combined_rows, output_folder + "combined.csv")
-    print(f"File CSV generato: {output_folder}combined.csv")
-    print(f"Totale righe: {len(combined_rows)} (header incluso)")
+    print("💾 Output generati:")
+    print(f"   - {output_folder}combined.xlsx")
+    print(f"   - {output_folder}combined.csv")
